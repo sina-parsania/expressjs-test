@@ -1,10 +1,11 @@
 const express = require("express");
+const UploadFiles = require("../../middleware/uploadFiles");
 const router = express.Router();
 const Products = require("../controllers/products");
 
 router.get("/", Products.getAll);
 
-router.post("/", Products.addProduct);
+router.post("/", UploadFiles.singleFile, Products.addProduct);
 
 router.get("/:pId", Products.getById);
 

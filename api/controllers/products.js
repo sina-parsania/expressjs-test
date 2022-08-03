@@ -3,7 +3,7 @@ const Product = require("../../models/product");
 class Products {
   getAll = (req, res) => {
     Product.find()
-      .select("name price")
+      .select("name price productImage")
       .exec()
       .then((docs) => {
         const response = {
@@ -12,6 +12,7 @@ class Products {
             return {
               name: doc.name,
               price: doc.price,
+              productImage: doc.productImage,
               _id: doc._id,
               request: {
                 type: "GET",
@@ -28,43 +29,10 @@ class Products {
       });
   };
 
-  addProduct = (req, res) => {
-    const { name, price } = req.body;
-
-    const product = new Product({
-      name,
-      price,
-    });
-
-    product
-      .save()
-      .then((response) => {
-        console.log(response);
-        res.status(201).json({
-          products: "Created product successfully",
-          createdProduct: {
-            name: response.name,
-            price: response.price,
-            _id: response._id,
-            request: {
-              type: "GET",
-              url: `${process.env.DOMAIN}/products/${response._id}`,
-            },
-          },
-        });
-      })
-      .catch((erorr) => {
-        console.log(erorr);
-        res.status(500).json({
-          erorr,
-        });
-      });
-  };
-
   getById = (req, res) => {
     const id = req.params.pId;
     Product.findById(id)
-      .select("name price")
+      .select("name price productImage")
       .exec()
       .then((doc) => {
         console.log(doc);
@@ -84,6 +52,40 @@ class Products {
       .catch((error) => {
         console.log(error);
         res.status(500).json({ error });
+      });
+  };
+
+  addProduct = (req, res) => {
+    const { name, price } = req.body;
+    const product = new Product({
+      name,
+      price,
+      productImage: req.file.path,
+    });
+
+    product
+      .save()
+      .then((response) => {
+        console.log(response);
+        res.status(201).json({
+          products: "Created product successfully",
+          createdProduct: {
+            name: response.name,
+            price: response.price,
+            productImage: response.productImage,
+            _id: response._id,
+            request: {
+              type: "GET",
+              url: `${process.env.DOMAIN}/products/${response._id}`,
+            },
+          },
+        });
+      })
+      .catch((erorr) => {
+        console.log(erorr);
+        res.status(500).json({
+          erorr,
+        });
       });
   };
 

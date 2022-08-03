@@ -6,6 +6,7 @@ class Orders {
   getAll = (req, res) => {
     Order.find()
       .select("productId quantity")
+      .populate(req.query.name === "true" ? "productId" : "")
       .exec()
       .then((docs) => {
         const response = {
@@ -23,6 +24,33 @@ class Orders {
           }),
         };
         res.status(200).json(response);
+      })
+      .catch((error) => {
+        console.log(error);
+        res.status(500).json({ error });
+      });
+  };
+
+  getById = (req, res) => {
+    const id = req.params.orderId;
+    Order.findById(id)
+      .select("productId quantity")
+      .populate("productId", "name")
+      .exec()
+      .then((order) => {
+        console.log(order);
+
+        if (order) {
+          res.status(200).json({
+            order,
+            request: {
+              type: "GET",
+              url: `${process.env.DOMAIN}/orders`,
+            },
+          });
+        } else {
+          res.status(404).json({ message: "No valid entry found for provided ID" });
+        }
       })
       .catch((error) => {
         console.log(error);
@@ -68,32 +96,6 @@ class Orders {
         res.status(500).json({
           erorr,
         });
-      });
-  };
-
-  getById = (req, res) => {
-    const id = req.params.orderId;
-    Order.findById(id)
-      .select("productId quantity")
-      .exec()
-      .then((order) => {
-        console.log(order);
-
-        if (order) {
-          res.status(200).json({
-            order,
-            request: {
-              type: "GET",
-              url: `${process.env.DOMAIN}/orders`,
-            },
-          });
-        } else {
-          res.status(404).json({ message: "No valid entry found for provided ID" });
-        }
-      })
-      .catch((error) => {
-        console.log(error);
-        res.status(500).json({ error });
       });
   };
 
